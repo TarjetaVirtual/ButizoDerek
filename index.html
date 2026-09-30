@@ -1034,7 +1034,7 @@
         <div class="loader-line"></div>
     </div>
 
-   <audio id="musica-boda" src="musica.mp3" autoplay loop></audio>
+  <audio id="musica-boda" src="musica.mp3" loop preload="auto"></audio>
   
     <div class="header-section">
         <div class="music-player" id="boton-musica">
@@ -1351,23 +1351,56 @@
     });
 
 // MÚSICA
+// ===============================
+// MÚSICA
+// ===============================
 const musica = document.getElementById("musica-boda");
 const btnMusica = document.getElementById("boton-musica");
 
-// Como la música empieza a sonar sola por el autoplay, 
-// añadimos la clase de reproducción al botón de entrada:
-btnMusica.classList.add("music-playing");
+// Intentar reproducir automáticamente
+function iniciarMusica() {
+    musica.play()
+        .then(() => {
+            btnMusica.classList.add("music-playing");
 
-btnMusica.addEventListener("click", () => {
+            // Ya comenzó, quitamos el evento de primera interacción
+            document.removeEventListener("click", iniciarMusica);
+            document.removeEventListener("touchstart", iniciarMusica);
+        })
+        .catch(() => {
+            // El navegador móvil bloqueó el autoplay.
+            // Esperamos la primera interacción del usuario.
+            console.log("Autoplay bloqueado. Esperando interacción.");
+        });
+}
+
+// Intento inicial
+window.addEventListener("load", () => {
+    iniciarMusica();
+});
+
+// Si el celular bloquea autoplay,
+// cualquier primer toque en la página iniciará la música.
+document.addEventListener("click", iniciarMusica, { once: true });
+document.addEventListener("touchstart", iniciarMusica, { once: true });
+
+// Botón de música
+btnMusica.addEventListener("click", (e) => {
+    e.stopPropagation();
+
     if (musica.paused) {
-        musica.play();
-        btnMusica.classList.add("music-playing");
+        musica.play()
+            .then(() => {
+                btnMusica.classList.add("music-playing");
+            })
+            .catch(error => {
+                console.log("No se pudo reproducir:", error);
+            });
     } else {
         musica.pause();
         btnMusica.classList.remove("music-playing");
     }
 });
-
     // WHATSAPP CANCIÓN
     // NUEVA LÓGICA PARA GOOGLE SHEETS
     async function sugerirCancion() {
